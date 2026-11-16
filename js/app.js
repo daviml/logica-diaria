@@ -166,6 +166,7 @@
     bugOutcome: 'hit',
     cwSyncBusy: false,
     cwSyncErr: '',
+    lastAutoCwSyncAt: 0,
     kataLoadingSlug: '',
     kataAutoTried: {},
     live: {
@@ -287,21 +288,49 @@
 
   /* ==================== INTEGRAÇÃO CODEWARS API ==================== */
   async function codewarsFetch(directUrl, proxyPath) {
+    // 1) Tenta direto na API do Codewars
     try {
       const r = await fetch(directUrl, { cache: 'no-store' });
       if (r.ok) return await r.json();
       if (r.status === 404) throw new Error('Não encontrado no Codewars (404).');
     } catch (e) {
       if (e.message && e.message.includes('404')) throw e;
-      // Fallback para proxy da Vercel caso bloqueado por CORS/rede
-      if (location.protocol !== 'file:') {
-        const pr = await fetch(proxyPath, { cache: 'no-store' });
-        if (pr.ok) return await pr.json();
-        if (pr.status === 404) throw new Error('Não encontrado no Codewars (404).');
-      }
-      throw new Error('Sem resposta da API do Codewars agora.');
     }
-    throw new Error('Erro ao consultar Codewars.');
+
+    // 2) Tenta proxy local /api/codewars (Vercel) checando se a resposta é realmente JSON
+    if (location.protocol !== 'file:') {
+      try {
+        const pr = await fetch(proxyPath, { cache: 'no-store' });
+        const ct = (pr.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) {
+          if (pr.ok) return await pr.json();
+          if (pr.status === 404) throw new Error('Não encontrado no Codewars (404).');
+        }
+      } catch (e) {
+        if (e.message && e.message.includes('404')) throw e;
+      }
+    }
+
+    // 3) Fallback CORS para hospedagem estática (GitHub Pages)
+    const corsProxies = [
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`,
+      `https://corsproxy.io/?url=${encodeURIComponent(directUrl)}`
+    ];
+    for (const url of corsProxies) {
+      try {
+        const cr = await fetch(url, { cache: 'no-store' });
+        if (cr.status === 404) throw new Error('Não encontrado no Codewars (404).');
+        if (!cr.ok) continue;
+        const txt = await cr.text();
+        const parsed = JSON.parse(txt);
+        if (parsed && !parsed.error) return parsed;
+        if (parsed && parsed.reason === 'not found') throw new Error('Não encontrado no Codewars (404).');
+      } catch (e) {
+        if (e.message && e.message.includes('404')) throw e;
+      }
+    }
+
+    throw new Error('Sem resposta da API do Codewars agora.');
   }
 
   function isKataDone(slug) {
@@ -629,7 +658,7 @@
         </div>
         <div style="display:flex;gap:0.4rem;">
           <button class="btn btn-sm" type="button" data-action="open-bug" title="Registrar hipótese de bug real do trabalho">🐛 +Bug</button>
-          <button class="btn btn-sm btn-violet" type="button" data-action="open-cw">+ Codewars</button>
+          <button class="btn btn-sm btn-violet" type="button" data-action="sync-cw-now" ${uiSession.cwSyncBusy ? 'disabled' : ''} title="Puxar katas resolvidos do Codewars">${uiSession.cwSyncBusy ? '⏳ Sync...' : '⚔ Sync Codewars'}</button>
         </div>
       </div>
       <div class="mini-heatmap" aria-label="Consistência dos últimos 14 dias">${cells.join('')}</div>
@@ -2445,12 +2474,25 @@
     showToast('🐛 Hipótese registrada e Check de hoje garantido ✅');
   });
 
+  function autoSyncCodewars() {
+    if (!navigator.onLine || uiSession.cwSyncBusy) return;
+    const user = state.codewarsProfile?.username || DEFAULT_CW_USER;
+    if (!user) return;
+    const now = Date.now();
+    if (now - uiSession.lastAutoCwSyncAt < 20000) return;
+    uiSession.lastAutoCwSyncAt = now;
+    syncCodewarsUser(user, true);
+  }
+
   applyTheme();
   render();
   if (syncCfg && syncCfg.token) sync();
-  if (navigator.onLine && state.codewarsProfile?.username) {
-    syncCodewarsUser(state.codewarsProfile.username, true);
-  }
+  autoSyncCodewars();
+
+  window.addEventListener('focus', autoSyncCodewars);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') autoSyncCodewars();
+  });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

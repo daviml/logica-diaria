@@ -1,10 +1,10 @@
-const CACHE_NAME = 'sinapse-v3';
+const CACHE_NAME = 'sinapse-v4';
 const ASSETS = [
   './',
   './index.html',
-  './css/styles.css?v=3',
-  './js/challenges.js?v=3',
-  './js/app.js?v=3',
+  './css/styles.css?v=4',
+  './js/challenges.js?v=4',
+  './js/app.js?v=4',
   './icon.svg',
   './icon-192.png',
   './icon-512.png',
