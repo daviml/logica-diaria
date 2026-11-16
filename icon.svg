@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sinapse — Lógica Diária">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="44%" r="65%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="55%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#0b1120" />
+    </radialGradient>
+    <radialGradient id="center-aura" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45" />
+      <stop offset="55%" stop-color="#8b5cf6" stop-opacity="0.16" />
+      <stop offset="100%" stop-color="#0b1120" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <linearGradient id="violet-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <linearGradient id="amber-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="gate-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.55" />
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.9" />
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo escuro arredondado com borda sutil -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-glow)" />
+  <rect x="14" y="14" width="484" height="484" rx="100" fill="none" stroke="#334155" stroke-opacity="0.55" stroke-width="3" />
+
+  <!-- Aura luminosa central -->
+  <circle cx="256" cy="256" r="180" fill="url(#center-aura)" />
+
+  <!-- Moldura sutil de porta lógica (hexágono / escudo geométrico) -->
+  <path d="M 156 140 H 254 C 334 140 384 188 384 256 C 384 324 334 372 254 372 H 156 Z"
+        fill="#0f172a" fill-opacity="0.65" stroke="url(#gate-stroke)" stroke-width="6" stroke-linejoin="round" />
+
+  <!-- Trilhas de circuito (entrada esquerda -> centro, centro -> saída direita) -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="14">
+    <!-- Entrada superior verde -->
+    <path d="M 88 184 H 170 L 214 226 H 248" stroke="url(#emerald-grad)" />
+    <!-- Entrada inferior violeta -->
+    <path d="M 88 328 H 170 L 214 286 H 248" stroke="url(#violet-grad)" />
+    <!-- Saída principal direita (misto) -->
+    <path d="M 272 256 H 424" stroke="url(#emerald-grad)" />
+    <!-- Ramos auxiliares superior/inferior -->
+    <path d="M 256 172 V 220" stroke="#8b5cf6" stroke-opacity="0.7" stroke-width="9" />
+    <path d="M 256 292 V 340" stroke="#10b981" stroke-opacity="0.7" stroke-width="9" />
+  </g>
+
+  <!-- Nós terminais -->
+  <circle cx="88" cy="184" r="16" fill="#10b981" />
+  <circle cx="88" cy="184" r="7" fill="#ecfdf5" />
+
+  <circle cx="88" cy="328" r="16" fill="#8b5cf6" />
+  <circle cx="88" cy="328" r="7" fill="#f5f3ff" />
+
+  <circle cx="256" cy="172" r="11" fill="#8b5cf6" />
+  <circle cx="256" cy="340" r="11" fill="#10b981" />
+
+  <circle cx="424" cy="256" r="18" fill="#10b981" />
+  <circle cx="424" cy="256" r="8" fill="#ecfdf5" />
+
+  <!-- Faísca central da Sinapse -->
+  <circle cx="256" cy="256" r="50" fill="#0b1120" stroke="#f59e0b" stroke-opacity="0.45" stroke-width="4" />
+  <path d="M 256 198 L 271 241 L 314 256 L 271 271 L 256 314 L 241 271 L 198 256 L 241 241 Z"
+        fill="url(#amber-grad)" />
+  <circle cx="256" cy="256" r="11" fill="#fffbeb" />
+</svg>
