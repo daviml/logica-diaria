@@ -1286,3 +1286,127 @@ button, input, select {
   margin: 0.65rem 0;
 }
 
+/* Widget "Suggested Challenge" estilo Codewars */
+.cw-suggested-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--bg-elev);
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 0.9rem;
+  box-shadow: var(--shadow);
+}
+
+@media (min-width: 580px) {
+  .cw-suggested-box {
+    grid-template-columns: 210px 1fr;
+  }
+}
+
+.cw-sug-left {
+  background: linear-gradient(180deg, var(--bg-elev-2) 0%, var(--bg-elev) 100%);
+  padding: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+@media (min-width: 580px) {
+  .cw-sug-left {
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+  }
+}
+
+.cw-sug-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.cw-sug-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-top: 0.25rem;
+}
+
+.cw-train-btn {
+  min-height: 40px;
+  border-radius: 9px;
+  border: 1px solid var(--emerald);
+  background: var(--emerald);
+  color: #06281e;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cw-skip-btn {
+  min-height: 40px;
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.cw-sug-right {
+  padding: 0.95rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.cw-sug-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.kyu-hex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.22rem 0.62rem;
+  border-radius: 8px;
+  border: 1.5px solid var(--text-secondary);
+  background: var(--bg-code);
+  color: #f8fafc;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.kyu-hex.kyu-8 { border-color: #e2e8f0; color: #f8fafc; }
+.kyu-hex.kyu-7 { border-color: #38bdf8; color: #7dd3fc; }
+.kyu-hex.kyu-6 { border-color: #f59e0b; color: #fcd34d; }
+
+.cw-desc-scroll {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.72rem 0.8rem;
+  font-size: 0.81rem;
+  color: #cbd5e1;
+  max-height: 175px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+

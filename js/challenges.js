@@ -996,9 +996,13 @@ Console.WriteLine(string.Join(", ", arr));`,
     ch.interviewTip = meta.tip;
   });
 
-  /* ==================== TRILHA CODEWARS (30 KATAS REAIS: 8 -> 6 KYU) ==================== */
+  /* ==================== TRILHA CODEWARS (35 KATAS REAIS: 8 -> 6 KYU) ==================== */
   const CODEWARS_TRACK = [
+    { slug: 'beginner-series-number-1-school-paperwork', title: 'Beginner Series #1 School Paperwork', kyu: '8 kyu', topic: 'Fundamentos', summaryPt: 'Seus colegas pediram para copiar deveres: são n colegas e cada dever tem m páginas. Calcule quantas páginas em branco você precisa (n * m). Se n < 0 ou m < 0, retorne 0.', hintPt: 'Caso de borda clássico: se n <= 0 ou m <= 0 retorne 0; senão n * m.' },
     { slug: 'even-or-odd', title: 'Even or Odd', kyu: '8 kyu', topic: 'Fundamentos', summaryPt: 'Receba um inteiro e retorne "Even" se for par ou "Odd" se for ímpar.', hintPt: 'Use operador módulo (n % 2 == 0).' },
+    { slug: 'opposites-attract', title: 'Opposites Attract', kyu: '8 kyu', topic: 'Fundamentos', summaryPt: 'Dados os números de pétalas de duas flores, retorne true se uma for par e a outra ímpar.', hintPt: 'Basta checar se (a % 2) != (b % 2) ou (a + b) % 2 == 1.' },
+    { slug: 'convert-boolean-values-to-strings-yes-or-no', title: 'Convert boolean values to strings Yes or No', kyu: '8 kyu', topic: 'Fundamentos', summaryPt: 'Receba um booleano e retorne "Yes" para true ou "No" para false.', hintPt: 'Operador ternário simples: "Yes" if b else "No" / b ? "Yes" : "No".' },
+    { slug: 'abbreviate-a-two-word-name', title: 'Abbreviate a Two Word Name', kyu: '8 kyu', topic: 'Strings', summaryPt: 'Converta um nome com duas palavras em iniciais maiúsculas separadas por ponto (ex.: "Sam Harris" → "S.H").', hintPt: 'Split no espaço, pegue o primeiro caractere de cada palavra em Upper e junte com ".".' },
     { slug: 'sum-of-positive', title: 'Sum of Positive', kyu: '8 kyu', topic: 'Arrays', summaryPt: 'Some apenas os números positivos de um array (retorne 0 se não houver nenhum).', hintPt: 'Filtro condicional + soma (sum com generator / Where().Sum()).' },
     { slug: 'reversed-strings', title: 'Reversed Strings', kyu: '8 kyu', topic: 'Strings', summaryPt: 'Inverta a string recebida mantendo a simplicidade.', hintPt: 'Python: s[::-1] | C#: new string(s.Reverse().ToArray()).' },
     { slug: 'remove-first-and-last-character', title: 'Remove First and Last Character', kyu: '8 kyu', topic: 'Strings', summaryPt: 'Remova o primeiro e o último caractere de uma string com >= 2 letras.', hintPt: 'Python: s[1:-1] | C#: s[1..^1].' },
@@ -1016,6 +1020,7 @@ Console.WriteLine(string.Join(", ", arr));`,
     { slug: 'sum-of-two-lowest-positive-integers', title: 'Sum of Two Lowest Positive Integers', kyu: '7 kyu', topic: 'Arrays', summaryPt: 'Some os dois menores números de um array de inteiros positivos.', hintPt: 'Ordene e some os 2 primeiros, ou faça uma passada O(N) guardando min1 e min2.' },
     { slug: 'complementary-dna', title: 'Complementary DNA', kyu: '7 kyu', topic: 'HashMap', summaryPt: 'Substitua A↔T e C↔G em uma fita de DNA (ex.: "ATTGC" → "TAACG").', hintPt: 'Use um dicionário de mapeamento em vez de vários if/else.' },
     { slug: 'friend-or-foe', title: 'Friend or Foe?', kyu: '7 kyu', topic: 'Filtros', summaryPt: 'Filtre uma lista de nomes mantendo apenas quem tem exatamente 4 letras.', hintPt: 'Preservando a ordem: [n for n in names if len(n) == 4].' },
+    { slug: 'jaden-casing-strings', title: 'Jaden Casing Strings', kyu: '7 kyu', topic: 'Strings', summaryPt: 'Capitalize a primeira letra de cada palavra da frase (ex.: "How Can Mirrors Be Real").', hintPt: 'Split por espaço, capitalize cada palavra (atenção a apóstrofos em .title() do Python!) e junte.' },
     { slug: 'multiples-of-3-or-5', title: 'Multiples of 3 or 5', kyu: '6 kyu', topic: 'Math', summaryPt: 'Some todos os múltiplos de 3 ou 5 menores que N (sem somar os múltiplos de 15 duas vezes!).', hintPt: 'Cuidado com o caso de borda N <= 0 e interseção dos múltiplos de 15.' },
     { slug: 'find-the-odd-int', title: 'Find the Odd Int', kyu: '6 kyu', topic: 'XOR / HashMap', summaryPt: 'Em um array de inteiros, apenas UM número aparece um número ímpar de vezes. Ache-o.', hintPt: 'XOR acumulado de todos os elementos encontra direto em O(N) tempo e O(1) espaço!' },
     { slug: 'stop-gninnips-my-sdrow', title: 'Stop gninnipS My sdroW!', kyu: '6 kyu', topic: 'Strings', summaryPt: 'Inverta apenas as palavras com 5 ou mais letras dentro de uma frase.', hintPt: 'Split por espaço, inverta condicional e join por espaço.' },

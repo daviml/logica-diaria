@@ -99,6 +99,8 @@
       exploreStatus: 'all',
       selectedExploreId: CHALLENGES[0].id,
       cwTrackFilter: 'pending', // 'pending' | 'done' | 'all'
+      cwSugFocus: 'fundamentals', // 'fundamentals' | 'rankup' | 'strings' | 'arrays' | 'hashmap' | 'all'
+      cwSugSkips: 0,
       selectedKataSlug: CODEWARS_TRACK[0].slug,
       colaFilter: 'Todas',
       colaSearch: '',
@@ -165,6 +167,7 @@
     cwSyncBusy: false,
     cwSyncErr: '',
     kataLoadingSlug: '',
+    kataAutoTried: {},
     live: {
       secondsLeft: 180,
       running: false,
@@ -305,8 +308,25 @@
     return !!state.codewarsProfile?.completedSlugs?.[slug];
   }
 
-  function getNextTrackKata() {
-    return CODEWARS_TRACK.find((k) => !isKataDone(k.slug)) || CODEWARS_TRACK[0];
+  function getSuggestedKataPool() {
+    const focus = state.cwSugFocus || 'fundamentals';
+    const pending = CODEWARS_TRACK.filter((k) => !isKataDone(k.slug));
+    const base = pending.length ? pending : CODEWARS_TRACK;
+    const filtered = base.filter((k) => {
+      if (focus === 'fundamentals') return k.kyu === '8 kyu' || k.kyu === '7 kyu';
+      if (focus === 'rankup') return k.kyu === '6 kyu';
+      if (focus === 'strings') return k.topic.toLowerCase().includes('string');
+      if (focus === 'arrays') return k.topic.toLowerCase().includes('array') || k.topic.toLowerCase().includes('filtro');
+      if (focus === 'hashmap') return /hash|contagem|pilha|xor/i.test(k.topic);
+      return true;
+    });
+    return filtered.length ? filtered : base;
+  }
+
+  function getSuggestedKata() {
+    const pool = getSuggestedKataPool();
+    const idx = ((state.cwSugSkips || 0) % pool.length + pool.length) % pool.length;
+    return { kata: pool[idx], poolSize: pool.length };
   }
 
   async function syncCodewarsUser(rawUser, silent = false) {
@@ -385,9 +405,11 @@
     }
   }
 
-  async function fetchKataDetail(slug) {
+  async function fetchKataDetail(slug, silent = false) {
+    if (uiSession.kataLoadingSlug === slug) return;
     uiSession.kataLoadingSlug = slug;
-    render();
+    uiSession.kataAutoTried[slug] = true;
+    if (!silent) render();
     try {
       const data = await codewarsFetch(
         `https://www.codewars.com/api/v1/code-challenges/${encodeURIComponent(slug)}`,
@@ -396,12 +418,13 @@
       state.kataCache[slug] = {
         description: data.description || '',
         rank: data.rank?.name || '',
+        tags: Array.isArray(data.tags) ? data.tags : [],
         url: data.url || `https://www.codewars.com/kata/${slug}`
       };
       saveState(false);
-      showToast('📖 Enunciado carregado e salvo para leitura offline!');
+      if (!silent) showToast('📖 Enunciado carregado e salvo para leitura offline!');
     } catch (err) {
-      showToast(err.message || 'Não foi possível carregar o enunciado.');
+      if (!silent) showToast(err.message || 'Não foi possível carregar o enunciado.');
     } finally {
       uiSession.kataLoadingSlug = '';
       render();
@@ -782,6 +805,86 @@
     `;
   }
 
+  function renderSuggestedKataWidget(showOpenListBtn = true) {
+    const { kata, poolSize } = getSuggestedKata();
+    const lang = state.codeLang === 'csharp' ? 'csharp' : 'python';
+    const focus = state.cwSugFocus || 'fundamentals';
+    const cached = state.kataCache[kata.slug];
+    const done = isKataDone(kata.slug);
+    const loading = uiSession.kataLoadingSlug === kata.slug;
+    const draft = state.kataDrafts[kata.slug]?.text || '';
+    const kyuNum = (kata.kyu.match(/\d+/) || ['8'])[0];
+
+    if (!cached && navigator.onLine && !uiSession.kataAutoTried[kata.slug]) {
+      setTimeout(() => fetchKataDetail(kata.slug, true), 0);
+    }
+
+    const tags = cached?.tags?.length ? cached.tags.slice(0, 4) : [kata.topic];
+
+    return `
+      <section class="cw-suggested-box" aria-label="Suggested Challenge Codewars">
+        <div class="cw-sug-left">
+          <div class="cw-sug-heading">
+            <span>Suggested Challenge</span>
+            <button type="button" class="btn btn-sm btn-ghost" style="min-height:28px;padding:0.15rem 0.4rem;" data-action="sync-cw-now" title="Sincronizar Codewars (${escapeHtml(state.codewarsProfile?.username || DEFAULT_CW_USER)})">
+              ${uiSession.cwSyncBusy ? '⏳' : '↻'}
+            </button>
+          </div>
+
+          <select class="select-input" aria-label="Linguagem de treino" data-action="cw-sug-lang">
+            <option value="python" ${lang === 'python' ? 'selected' : ''}>🐍 Python</option>
+            <option value="csharp" ${lang === 'csharp' ? 'selected' : ''}>🟣 C# (.NET)</option>
+          </select>
+
+          <select class="select-input" aria-label="Foco dos katas" data-action="cw-sug-focus">
+            <option value="fundamentals" ${focus === 'fundamentals' ? 'selected' : ''}>📖 Fundamentals (8–7 kyu)</option>
+            <option value="rankup" ${focus === 'rankup' ? 'selected' : ''}>⚡ Rank Up (6 kyu)</option>
+            <option value="strings" ${focus === 'strings' ? 'selected' : ''}>🔤 Strings</option>
+            <option value="arrays" ${focus === 'arrays' ? 'selected' : ''}>🧱 Arrays</option>
+            <option value="hashmap" ${focus === 'hashmap' ? 'selected' : ''}>🗂 HashSet &amp; Dict</option>
+            <option value="all" ${focus === 'all' ? 'selected' : ''}>🌐 Todos da Trilha</option>
+          </select>
+
+          <div class="cw-sug-actions">
+            <a class="cw-train-btn" href="https://www.codewars.com/kata/${kata.slug}/train/${lang}" target="_blank" rel="noopener noreferrer">TRAIN</a>
+            <button type="button" class="cw-skip-btn" data-action="cw-sug-skip">SKIP</button>
+          </div>
+
+          ${
+            showOpenListBtn
+              ? `<button type="button" class="btn btn-sm btn-ghost" style="padding:0.25rem;" data-action="cw-sug-open-list">🔍 Ver trilha (${poolSize})</button>`
+              : `<div class="muted-text" style="font-size:0.74rem;text-align:center;">${poolSize} sugestão(ões) neste foco</div>`
+          }
+        </div>
+
+        <div class="cw-sug-right">
+          <div class="cw-sug-title-row">
+            <span class="kyu-hex kyu-${kyuNum}">${escapeHtml(kata.kyu)}</span>
+            <h3 class="challenge-title" style="margin:0;">${escapeHtml(kata.title)}</h3>
+            ${done ? '<span class="pill pill-emerald">✅ Feito</span>' : ''}
+          </div>
+
+          <p class="challenge-story" style="margin:0;">${escapeHtml(kata.summaryPt)}</p>
+          <div class="muted-text" style="font-size:0.8rem;"><strong>💡 Dica:</strong> ${escapeHtml(kata.hintPt)}</div>
+
+          ${
+            cached?.description
+              ? `<div class="cw-desc-scroll">${escapeHtml(cached.description)}</div>`
+              : loading
+              ? `<div class="cw-desc-scroll">⏳ Carregando enunciado oficial da API do Codewars...</div>`
+              : `<div class="actions-row" style="margin-top:0.15rem;"><button type="button" class="btn btn-sm" data-action="fetch-kata" data-slug="${kata.slug}">📖 Carregar enunciado completo (API)</button></div>`
+          }
+
+          <div class="pills-row">
+            ${tags.map((t) => `<span class="pill pill-muted">${escapeHtml(String(t).toUpperCase())}</span>`).join('')}
+          </div>
+
+          <textarea class="textarea-input" rows="2" placeholder="💭 Meu rascunho de lógica no celular (salvo para abrir no PC)..." data-kata-draft="${kata.slug}">${escapeHtml(draft)}</textarea>
+        </div>
+      </section>
+    `;
+  }
+
   /* ==================== ABA 1: HOJE (3 SUB-ABAS LIMPAS) ==================== */
   function formatTimer(sec) {
     const s = Math.max(0, sec);
@@ -908,15 +1011,14 @@
     }
 
     if (state.hojeSubtab === 'kata') {
-      const nextKata = getNextTrackKata();
       const doneCount = CODEWARS_TRACK.filter((k) => isKataDone(k.slug)).length;
       return `
         ${subtabs}
         <div class="section-head">
-          <h2 class="section-title">⚔ Do Celular para o PC</h2>
-          <span class="muted-text">${doneCount}/${CODEWARS_TRACK.length} na trilha</span>
+          <h2 class="section-title">⚔ Sugestão do Codewars</h2>
+          <span class="muted-text">${doneCount}/${CODEWARS_TRACK.length} feitos (${escapeHtml(state.codewarsProfile?.username || DEFAULT_CW_USER)})</span>
         </div>
-        ${renderKataDetailCard(nextKata, '⚔ Próximo Kata')}
+        ${renderSuggestedKataWidget(true)}
       `;
     }
 
@@ -1364,6 +1466,7 @@
         <h2 class="section-title">⚔ Trilha Codewars (8 → 6 kyu)</h2>
         <span class="muted-text">${doneTotal}/${CODEWARS_TRACK.length} feitos</span>
       </div>
+      ${renderSuggestedKataWidget(false)}
       <div class="chips-scroll">
         ${[
           { id: 'pending', label: `Pendentes (${CODEWARS_TRACK.length - doneTotal})` },
@@ -1940,6 +2043,16 @@
       state.cwTrackFilter = target.dataset.val;
       saveState(false);
       render();
+    } else if (action === 'cw-sug-skip') {
+      state.cwSugSkips = (state.cwSugSkips || 0) + 1;
+      saveState(false);
+      render();
+    } else if (action === 'cw-sug-open-list') {
+      state.activeTab = 'explorar';
+      state.explorarSubtab = 'codewars';
+      saveState(false);
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (action === 'select-kata') {
       state.selectedKataSlug = target.dataset.slug;
       saveState(false);
@@ -2259,6 +2372,15 @@
   document.addEventListener('change', (ev) => {
     if (ev.target.dataset.action === 'sw-guess') {
       labState.switches.guess[Number(ev.target.dataset.bulb)] = ev.target.value;
+    } else if (ev.target.dataset.action === 'cw-sug-lang') {
+      state.codeLang = ev.target.value;
+      saveState(false);
+      render();
+    } else if (ev.target.dataset.action === 'cw-sug-focus') {
+      state.cwSugFocus = ev.target.value;
+      state.cwSugSkips = 0;
+      saveState(false);
+      render();
     } else if (ev.target.id === 'import-json-input') {
       const file = ev.target.files?.[0];
       if (!file) return;
