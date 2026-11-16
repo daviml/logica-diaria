@@ -14,6 +14,7 @@
 
   const STORAGE_KEY = 'sinapse_state_v1';
   const SYNC_KEY = 'sinapse_sync_cfg_v1';
+  const DEFAULT_CW_USER = 'davimoraesladeira';
 
   /* ==================== UTILITÁRIOS DE DATA & HTML ==================== */
   function localDateKey(date = new Date()) {
@@ -107,7 +108,7 @@
       attempts: {},
       labsDone: {},
       codewarsProfile: {
-        username: '',
+        username: DEFAULT_CW_USER,
         honor: 0,
         overallRank: '',
         pythonRank: '',
@@ -137,6 +138,7 @@
     s.codewarsProfile = {
       ...base.codewarsProfile,
       ...(s.codewarsProfile || {}),
+      username: (s.codewarsProfile && s.codewarsProfile.username) ? s.codewarsProfile.username : DEFAULT_CW_USER,
       completedSlugs:
         s.codewarsProfile && typeof s.codewarsProfile.completedSlugs === 'object'
           ? s.codewarsProfile.completedSlugs
@@ -308,7 +310,7 @@
   }
 
   async function syncCodewarsUser(rawUser, silent = false) {
-    const user = (rawUser || state.codewarsProfile?.username || '').trim();
+    const user = (rawUser || state.codewarsProfile?.username || DEFAULT_CW_USER).trim();
     if (!user) {
       if (!silent) showToast('Informe seu username do Codewars.');
       return;
@@ -2324,6 +2326,9 @@
   applyTheme();
   render();
   if (syncCfg && syncCfg.token) sync();
+  if (navigator.onLine && state.codewarsProfile?.username) {
+    syncCodewarsUser(state.codewarsProfile.username, true);
+  }
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
